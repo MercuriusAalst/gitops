@@ -54,7 +54,7 @@ an empty `clusterResourceWhitelist` and a single allowed destination namespace,
 so a chart change that starts creating cluster-scoped objects fails at the
 project boundary instead of quietly gaining cluster-wide reach.
 
-The chart itself comes from `oci://registry-1.docker.io/livingwooods/lan-party`;
+The chart itself comes from `oci://ghcr.io/mercuriusaalst/charts/lan-party`;
 the values come from this repo, wired together by the `$values` ref in the
 Application's second source.
 
@@ -79,6 +79,25 @@ three, and backend can ship while frontend waits.
 
 The bot only ever pushes to `dev/`. Production changes exclusively through a
 merge — a path the workflow cannot reach, not a convention it politely follows.
+
+## Registry access
+
+Everything — both images and the chart — now lives on GHCR:
+
+```
+ghcr.io/mercuriusaalst/mercurius-backend    image
+ghcr.io/mercuriusaalst/mercurius-frontend   image
+ghcr.io/mercuriusaalst/charts/lan-party     chart
+```
+
+ArgoCD needs the chart registry registered once, from `infrastructure`, as a
+repository Secret with `enableOCI: "true"`. **GHCR packages are private by
+default even when the source repo is public**, which fails in two different
+places: a private chart package makes the Application fail to resolve its
+source, and a private image package gives you `ImagePullBackOff`. Either make
+all three packages public once under the org's Packages settings, or give the
+repository Secret a PAT with `read:packages` and set `imagePullSecrets` in the
+values.
 
 ## Required secrets
 

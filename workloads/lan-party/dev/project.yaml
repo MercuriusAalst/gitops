@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Mercurius LAN party, dev environment.
   sourceRepos:
-    - registry-1.docker.io/livingwooods
+    - ghcr.io/mercuriusaalst/charts
     - https://github.com/MercuriusAalst/gitops
   destinations:
     - server: https://kubernetes.default.svc
