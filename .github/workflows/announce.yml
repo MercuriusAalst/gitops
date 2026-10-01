@@ -1,0 +1,82 @@
+---
+name: Announce
+
+# Fired by the app repos (new image) and the chart repo (new chart). Both land
+# on main for dev; both open a PR for production.
+on:
+  repository_dispatch:
+    types:
+      - new-image
+      - new-chart
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    name: Bump dev and propose production
+    env:
+      KIND: ${{ github.event.action }}
+      APP: ${{ github.event.client_payload.app }}
+      V: ${{ github.event.client_payload.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate payload
+        run: |
+          set -euo pipefail
+          [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::bad version: $V"; exit 1; }
+          if [ "$KIND" = "new-image" ]; then
+            case "$APP" in
+              backend|frontend) ;;
+              *) echo "::error::unknown app: $APP"; exit 1 ;;
+            esac
+          fi
+
+      - name: Bump dev and push to main
+        run: |
+          set -euo pipefail
+          if [ "$KIND" = "new-image" ]; then
+            yq -i '.[strenv(APP)].image.tag = strenv(V)' dev/values.yaml
+            MSG="chore: $APP image dev -> $V"
+          else
+            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' dev/application.yaml
+            MSG="chore: chart dev -> $V"
+          fi
+          git config user.name gitops-bot
+          git config user.email gitops-bot@users.noreply.github.com
+          git commit -am "$MSG" || echo "dev already at $V"
+          # Two releases announcing seconds apart would otherwise lose one to a
+          # rejected push. They touch different keys, so rebasing is safe.
+          git pull --rebase origin main
+          git push
+
+      - name: Bump prd in the working tree
+        run: |
+          set -euo pipefail
+          if [ "$KIND" = "new-image" ]; then
+            yq -i '.[strenv(APP)].image.tag = strenv(V)' prd/values.yaml
+          else
+            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' prd/application.yaml
+          fi
+
+      - name: Open production promotion PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # Deliberately not GITHUB_TOKEN: PRs it opens do not trigger other
+          # workflows, so any check added here later would silently skip
+          # exactly the PRs that matter.
+          token: ${{ secrets.GITOPS_PR_TOKEN }}
+          base: main
+          branch: promote/${{ github.event.action == 'new-image' && github.event.client_payload.app || 'chart' }}
+          title: "${{ github.event.action == 'new-image' && format('Promote {0} image to {1}', github.event.client_payload.app, github.event.client_payload.version) || format('Promote chart to {0}', github.event.client_payload.version) }}"
+          commit-message: "${{ github.event.action == 'new-image' && format('chore: {0} image prd -> {1}', github.event.client_payload.app, github.event.client_payload.version) || format('chore: chart prd -> {0}', github.event.client_payload.version) }}"
+          body: |
+            `${{ env.V }}` is released and already running in dev.
+
+            Merging this rolls it out to production.
+          labels: promotion
+          delete-branch: true

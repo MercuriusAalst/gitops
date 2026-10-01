@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lan-party-prd
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mercurius-prd
+  sources:
+    - repoURL: registry-1.docker.io/livingwooods
+      chart: lan-party
+      # Chart version. Written by .github/workflows/announce.yml on dev,
+      # promoted to prd by merging the PR it opens.
+      targetRevision: 0.1.0
+      helm:
+        releaseName: lan-party
+        valueFiles:
+          - $values/prd/values.yaml
+    - repoURL: https://github.com/MercuriusAalst/gitops
+      targetRevision: main
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

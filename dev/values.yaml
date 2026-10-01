@@ -1,0 +1,44 @@
+# Dev overrides. Everything not listed here comes from the chart's own
+# values.yaml. Image tags are written by the announce workflow; the rest is
+# hand-edited.
+
+hosts:
+  frontend: devlan.mercurius-aalst.be
+  backend: devapi.mercurius-aalst.be
+
+externalSecrets:
+  secretStore:
+    name: mercurius
+    kind: ClusterSecretStore
+
+postgres:
+  storage:
+    size: 5Gi
+
+backend:
+  image:
+    tag: "0.5.2"
+  storage:
+    size: 2Gi
+  config:
+    # Must match the Auth0 API identifier for the dev API.
+    Mercurius.LAN.API_Auth0__Audience: https://devapi.mercurius-aalst.be
+  resources:
+    requests:
+      cpu: 50m
+      memory: 192Mi
+    limits:
+      memory: 512Mi
+
+frontend:
+  image:
+    tag: "0.4.0"
+  config:
+    Auth0__Audience: https://devapi.mercurius-aalst.be
+    ContactEmail__Enabled: "false"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 192Mi
+    limits:
+      memory: 384Mi
