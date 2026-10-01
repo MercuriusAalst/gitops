@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudnative-pg
+  namespace: argocd
+  annotations:
+    # Owns the Cluster CRD that the lan-party chart renders, and must exist
+    # before the barman-cloud plugin registers against it.
+    argocd.argoproj.io/sync-wave: "-20"
+spec:
+  project: core
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cnpg-system
+  source:
+    repoURL: https://cloudnative-pg.github.io/charts
+    chart: cloudnative-pg
+    targetRevision: 0.29.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    # First wave: the barman-cloud plugin cannot start without it.
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  project: core
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.21.2
+    helm:
+      values: |
+        # Off by default in this chart, and the plugin's Certificate needs them.
+        crds:
+          enabled: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

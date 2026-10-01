@@ -40,10 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$KIND" = "new-image" ]; then
-            yq -i '.[strenv(APP)].image.tag = strenv(V)' dev/values.yaml
+            yq -i '.[strenv(APP)].image.tag = strenv(V)' workloads/lan-party/dev/values.yaml
             MSG="chore: $APP image dev -> $V"
           else
-            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' dev/application.yaml
+            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' workloads/lan-party/dev/application.yaml
             MSG="chore: chart dev -> $V"
           fi
           git config user.name gitops-bot
@@ -58,9 +58,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$KIND" = "new-image" ]; then
-            yq -i '.[strenv(APP)].image.tag = strenv(V)' prd/values.yaml
+            yq -i '.[strenv(APP)].image.tag = strenv(V)' workloads/lan-party/prd/values.yaml
           else
-            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' prd/application.yaml
+            yq -i '(.spec.sources[] | select(has("chart")) | .targetRevision) = strenv(V)' workloads/lan-party/prd/application.yaml
           fi
 
       - name: Open production promotion PR

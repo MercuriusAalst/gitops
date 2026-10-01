@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: lan-party-dev
+  name: lan-party-prd
   namespace: argocd
 spec:
-  project: default
+  project: lan-party-prd
   destination:
     server: https://kubernetes.default.svc
-    namespace: mercurius-dev
+    namespace: mercurius-prd
   sources:
     - repoURL: registry-1.docker.io/livingwooods
       chart: lan-party
@@ -17,7 +17,7 @@ spec:
       helm:
         releaseName: lan-party
         valueFiles:
-          - $values/dev/values.yaml
+          - $values/workloads/lan-party/prd/values.yaml
     - repoURL: https://github.com/MercuriusAalst/gitops
       targetRevision: main
       ref: values

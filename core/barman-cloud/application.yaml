@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: barman-cloud
+  namespace: argocd
+  annotations:
+    # Last of the core wave: needs cert-manager for its TLS certificates and
+    # the CloudNativePG operator to register the plugin against.
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  project: core
+  destination:
+    server: https://kubernetes.default.svc
+    # Deliberately alongside the operator: the plugin is discovered in the
+    # operator's own namespace.
+    namespace: cnpg-system
+  source:
+    repoURL: ghcr.io/cloudnative-pg/charts
+    chart: plugin-barman-cloud
+    targetRevision: 0.8.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

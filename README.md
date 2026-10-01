@@ -8,11 +8,51 @@ release per environment — backend, frontend and the CloudNativePG database
 together — so there is one `Application` per environment, not one per app.
 
 ```
-dev/application.yaml   chart version    <- bot writes, on main
-dev/values.yaml        image tags       <- bot writes, on main
-prd/application.yaml   chart version    <- only via a merged promotion PR
-prd/values.yaml        image tags       <- only via a merged promotion PR
+core/                                    cluster-wide operators, pinned versions
+  project.yaml                           AppProject: may create cluster-scoped resources
+  cert-manager/application.yaml          wave -30
+  external-secrets-operator/...          wave -30
+  cloudnative-pg/application.yaml        wave -20
+  barman-cloud/application.yaml          wave -10
+
+workloads/lan-party/
+  dev/project.yaml                       AppProject: namespaced resources only
+  dev/application.yaml                   chart version  <- bot writes, on main
+  dev/values.yaml                        image tags     <- bot writes, on main
+  prd/project.yaml
+  prd/application.yaml                   chart version  <- only via a merged PR
+  prd/values.yaml                        image tags     <- only via a merged PR
 ```
+
+## core
+
+Four operators the workloads cannot run without:
+
+| Application | Chart | Why |
+|---|---|---|
+| `cert-manager` | `cert-manager` v1.21.2 | issues the barman plugin's TLS certificates |
+| `external-secrets-operator` | `external-secrets` 2.11.0 | serves every `ExternalSecret` the chart renders |
+| `cloudnative-pg` | `cloudnative-pg` 0.29.1 | owns the `Cluster` CRD the chart renders |
+| `barman-cloud` | `plugin-barman-cloud` 0.8.1 | WAL archiving and backups for that Cluster |
+
+Sync waves order them: cert-manager and external-secrets first, then the
+CloudNativePG operator, then the plugin that registers against it. The
+workloads land in the default wave, after all four.
+
+`barman-cloud` goes into `cnpg-system` on purpose — the operator only discovers
+plugins in its own namespace. It is also why cert-manager is here at all: the
+plugin chart will not start without it.
+
+Versions are pinned. Renovate or a human bumps them; nothing bumps them
+automatically.
+
+## Projects
+
+`core` may create cluster-scoped resources, because operators are CRDs,
+webhooks and ClusterRoles by nature. `lan-party-dev` and `lan-party-prd` have
+an empty `clusterResourceWhitelist` and a single allowed destination namespace,
+so a chart change that starts creating cluster-scoped objects fails at the
+project boundary instead of quietly gaining cluster-wide reach.
 
 The chart itself comes from `oci://registry-1.docker.io/livingwooods/lan-party`;
 the values come from this repo, wired together by the `$values` ref in the
@@ -59,5 +99,5 @@ never whole files, so dev hostnames cannot reach production.
 ## Checking a change before pushing
 
 ```sh
-helm template lan-party ../lan-party-helmchart --values dev/values.yaml
+helm template lan-party ../lan-party-helmchart --values workloads/lan-party/dev/values.yaml
 ```

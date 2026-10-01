@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: core
+  namespace: argocd
+spec:
+  description: Cluster-wide operators the workloads depend on.
+  sourceRepos:
+    - https://charts.jetstack.io
+    - https://charts.external-secrets.io
+    - https://cloudnative-pg.github.io/charts
+    - ghcr.io/cloudnative-pg/charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+  # Operators are CRDs, webhooks and ClusterRoles by nature. This project is
+  # allowed all of that; the workload projects are allowed none of it.
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: lan-party-dev
+  namespace: argocd
+spec:
+  description: Mercurius LAN party, dev environment.
+  sourceRepos:
+    - registry-1.docker.io/livingwooods
+    - https://github.com/MercuriusAalst/gitops
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: mercurius-dev
+  # Empty: the lan-party chart renders namespaced resources only. A chart
+  # change that starts creating cluster-scoped objects fails here instead of
+  # quietly gaining cluster-wide reach.
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
