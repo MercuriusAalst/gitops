@@ -1,6 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
+  annotations:
+    # Before every Application, which would otherwise reference a project that
+    # does not exist yet on the first sync.
+    argocd.argoproj.io/sync-wave: "-100"
   name: core
   namespace: argocd
 spec:

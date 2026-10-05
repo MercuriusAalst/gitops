@@ -1,0 +1,30 @@
+# One-time, by hand:
+#   kubectl apply -f bootstrap.yaml
+# After that every manifest in this repo is Argo CD's problem, including this
+# one - it syncs itself along with the rest.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap
+  namespace: argocd
+spec:
+  # `default`, not `core`: this is the app that creates the core AppProject, so
+  # it cannot already be in it.
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  source:
+    repoURL: https://github.com/MercuriusAalst/gitops
+    targetRevision: main
+    path: .
+    directory:
+      recurse: true
+      # values.yaml are Helm inputs the Applications pull in through $values,
+      # not manifests to apply; .github is CI. Everything else here is an
+      # Application or an AppProject.
+      exclude: "{.github/**,**/values.yaml}"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
