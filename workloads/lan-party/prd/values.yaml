@@ -5,22 +5,18 @@
 hosts:
   frontend: lan.mercurius-aalst.be
   backend: api.mercurius-aalst.be
-
 externalSecrets:
   secretStore:
     name: mercurius
     kind: ClusterSecretStore
-
 postgres:
   storage:
     size: 10Gi
-
 backend:
   image:
-    tag: "0.5.2"
+    tag: "0.6.0"
   storage:
     size: 10Gi
-
 frontend:
   image:
     tag: "0.4.0"
