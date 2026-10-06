@@ -7,7 +7,7 @@ hosts:
   backend: devapi.mercurius-aalst.be
 externalSecrets:
   secretStore:
-    name: mercurius
+    name: mercurius-dev
     kind: ClusterSecretStore
 postgres:
   storage:

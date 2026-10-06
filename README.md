@@ -12,6 +12,8 @@ core/                                    cluster-wide operators, pinned versions
   project.yaml                           AppProject: may create cluster-scoped resources
   cert-manager/application.yaml          wave -30
   external-secrets-operator/...          wave -30
+  external-secrets-operator/cluster-secret-stores.yaml
+                                         Infisical stores mercurius-dev / mercurius-prd
   cloudnative-pg/application.yaml        wave -20
   barman-cloud/application.yaml          wave -10
 

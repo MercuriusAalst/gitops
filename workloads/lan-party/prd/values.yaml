@@ -8,7 +8,7 @@ hosts:
 
 externalSecrets:
   secretStore:
-    name: mercurius
+    name: mercurius-prd
     kind: ClusterSecretStore
 
 postgres:
