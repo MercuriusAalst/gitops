@@ -15,10 +15,13 @@ spec:
   destinations:
     - server: https://kubernetes.default.svc
       namespace: mercurius-dev
-  # Empty: the lan-party chart renders namespaced resources only. A chart
-  # change that starts creating cluster-scoped objects fails here instead of
-  # quietly gaining cluster-wide reach.
-  clusterResourceWhitelist: []
+  # Namespace only, for CreateNamespace=true. The lan-party chart renders
+  # namespaced resources only; a chart change that starts creating other
+  # cluster-scoped objects fails here instead of quietly gaining cluster-wide
+  # reach.
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"

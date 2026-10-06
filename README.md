@@ -49,10 +49,11 @@ automatically.
 ## Projects
 
 `core` may create cluster-scoped resources, because operators are CRDs,
-webhooks and ClusterRoles by nature. `lan-party-dev` and `lan-party-prd` have
-an empty `clusterResourceWhitelist` and a single allowed destination namespace,
-so a chart change that starts creating cluster-scoped objects fails at the
-project boundary instead of quietly gaining cluster-wide reach.
+webhooks and ClusterRoles by nature. `lan-party-dev` and `lan-party-prd` may
+create exactly one cluster-scoped kind, `Namespace` (for `CreateNamespace=true`),
+and have a single allowed destination namespace, so a chart change that starts
+creating other cluster-scoped objects fails at the project boundary instead of
+quietly gaining cluster-wide reach.
 
 The chart itself comes from `oci://ghcr.io/mercuriusaalst/charts/lan-party`;
 the values come from this repo, wired together by the `$values` ref in the
