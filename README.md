@@ -14,7 +14,7 @@ core/                                    cluster-wide operators, pinned versions
   external-secrets-operator/...          wave -30
   external-secrets-operator/cluster-secret-stores.yaml
                                          Infisical stores mercurius-dev / mercurius-prd
-  cloudflared/cloudflared.yaml            Cloudflare Tunnel connector, the only ingress
+  cloudflared/application.yaml           Cloudflare Tunnel connector, the only ingress
   cloudnative-pg/application.yaml        wave -20
   barman-cloud/application.yaml          wave -10
 
@@ -29,7 +29,7 @@ workloads/lan-party/
 
 ## core
 
-Four operators the workloads cannot run without:
+What the workloads cannot run without:
 
 | Application | Chart | Why |
 |---|---|---|
@@ -37,6 +37,7 @@ Four operators the workloads cannot run without:
 | `external-secrets-operator` | `external-secrets` 2.11.0 | serves every `ExternalSecret` the chart renders |
 | `cloudnative-pg` | `cloudnative-pg` 0.29.1 | owns the `Cluster` CRD the chart renders |
 | `barman-cloud` | `plugin-barman-cloud` 0.8.1 | WAL archiving and backups for that Cluster |
+| `cloudflared` | bjw-s `app-template` 5.2.1 | Cloudflare Tunnel connector; the only way into the cluster |
 
 Sync waves order them: cert-manager and external-secrets first, then the
 CloudNativePG operator, then the plugin that registers against it. The
