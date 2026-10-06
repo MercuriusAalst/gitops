@@ -13,7 +13,7 @@ spec:
       chart: lan-party
       # Chart version. Written by .github/workflows/announce.yml on dev,
       # promoted to prd by merging the PR it opens.
-      targetRevision: 0.1.0
+      targetRevision: 1.0.0
       helm:
         releaseName: lan-party
         valueFiles:
