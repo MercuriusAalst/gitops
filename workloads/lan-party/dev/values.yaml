@@ -3,8 +3,8 @@
 # hand-edited.
 
 hosts:
-  frontend: devlan.mercurius-aalst.be
-  backend: devapi.mercurius-aalst.be
+  frontend: dev-lan.mercurius-aalst.be
+  backend: dev-api.mercurius-aalst.be
 externalSecrets:
   secretStore:
     name: mercurius-dev
