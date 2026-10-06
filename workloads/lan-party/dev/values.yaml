@@ -5,16 +5,13 @@
 hosts:
   frontend: devlan.mercurius-aalst.be
   backend: devapi.mercurius-aalst.be
-
 externalSecrets:
   secretStore:
     name: mercurius
     kind: ClusterSecretStore
-
 postgres:
   storage:
     size: 5Gi
-
 backend:
   image:
     tag: "0.5.2"
@@ -29,10 +26,9 @@ backend:
       memory: 192Mi
     limits:
       memory: 512Mi
-
 frontend:
   image:
-    tag: "0.4.0"
+    tag: "0.5.0"
   config:
     Auth0__Audience: https://devapi.mercurius-aalst.be
     ContactEmail__Enabled: "false"
