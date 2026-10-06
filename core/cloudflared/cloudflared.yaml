@@ -1,0 +1,103 @@
+# Cloudflare Tunnel connector: the cluster's only way in. It dials out to
+# Cloudflare, so nothing listens on the node. The tunnel is remotely managed -
+# its public hostnames and the services they route to are configured in the
+# Zero Trust dashboard, not here; this only runs the connector.
+#
+# One tunnel for dev and prd, so its token lives with prd:
+#   Infisical project cluster, environment prd, /cloudflared/TUNNEL_TOKEN
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflared
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cloudflared
+  namespace: cloudflared
+  annotations:
+    # The CRD comes from the external-secrets-operator Application; on a fresh
+    # cluster it does not exist yet when bootstrap first syncs.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: mercurius-prd
+    kind: ClusterSecretStore
+  target:
+    name: cloudflared
+    creationPolicy: Owner
+  data:
+    - secretKey: TUNNEL_TOKEN
+      remoteRef:
+        # Leading slash: an absolute Infisical path, overriding the store's
+        # /lan-party default.
+        key: /cloudflared/TUNNEL_TOKEN
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflared
+  labels:
+    app.kubernetes.io/name: cloudflared
+spec:
+  # Two connectors, so a rollout or a crashed pod never drops the tunnel.
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflared
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudflared
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.9.3
+          # The image's entrypoint is `cloudflared --no-autoupdate`.
+          args:
+            - tunnel
+            - --metrics
+            - 0.0.0.0:2000
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared
+                  key: TUNNEL_TOKEN
+          ports:
+            - name: metrics
+              containerPort: 2000
+          # /ready is 200 once the connector holds at least one connection to
+          # Cloudflare's edge.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi

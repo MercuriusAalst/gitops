@@ -14,6 +14,7 @@ core/                                    cluster-wide operators, pinned versions
   external-secrets-operator/...          wave -30
   external-secrets-operator/cluster-secret-stores.yaml
                                          Infisical stores mercurius-dev / mercurius-prd
+  cloudflared/cloudflared.yaml            Cloudflare Tunnel connector, the only ingress
   cloudnative-pg/application.yaml        wave -20
   barman-cloud/application.yaml          wave -10
 
