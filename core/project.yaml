@@ -15,6 +15,7 @@ spec:
     - https://cloudnative-pg.github.io/charts
     - ghcr.io/cloudnative-pg/charts
     - ghcr.io/bjw-s-labs/helm
+    - https://stakater.github.io/stakater-charts
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "*"
