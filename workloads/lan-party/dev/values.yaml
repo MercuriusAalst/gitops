@@ -28,7 +28,7 @@ backend:
       memory: 512Mi
 frontend:
   image:
-    tag: "0.6.0"
+    tag: "0.7.0"
   config:
     Auth0__Audience: https://devapi.mercurius-aalst.be
     ContactEmail__Enabled: "false"
