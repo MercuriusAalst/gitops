@@ -14,7 +14,7 @@ postgres:
     size: 5Gi
 backend:
   image:
-    tag: "0.8.1"
+    tag: "0.8.2"
   storage:
     size: 2Gi
   config:
