@@ -49,10 +49,15 @@ jobs:
           git config user.name gitops-bot
           git config user.email gitops-bot@users.noreply.github.com
           git commit -am "$MSG" || echo "dev already at $V"
-          # Two releases announcing seconds apart would otherwise lose one to a
-          # rejected push. They touch different keys, so rebasing is safe.
-          git pull --rebase origin main
-          git push
+          # Two releases announcing seconds apart race for main: a single
+          # pull-then-push still loses when the other push lands in between.
+          # They touch different keys, so rebasing and retrying is safe.
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            sleep $((attempt * 3))
+          done
+          echo "::error::could not push to main after 5 attempts"
+          exit 1
 
       - name: Bump prd in the working tree
         run: |
