@@ -19,4 +19,4 @@ backend:
     size: 10Gi
 frontend:
   image:
-    tag: "0.4.0"
+    tag: "0.8.3"
