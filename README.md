@@ -15,6 +15,7 @@ core/                                    cluster-wide operators, pinned versions
   external-secrets-operator/cluster-secret-stores.yaml
                                          Infisical stores mercurius-dev / mercurius-prd
   cloudflared/application.yaml           Cloudflare Tunnel connector, the only ingress
+  reloader/application.yaml              restarts workloads when a Secret they use changes
   cloudnative-pg/application.yaml        wave -20
   barman-cloud/application.yaml          wave -10
 
@@ -38,6 +39,7 @@ What the workloads cannot run without:
 | `cloudnative-pg` | `cloudnative-pg` 0.29.1 | owns the `Cluster` CRD the chart renders |
 | `barman-cloud` | `plugin-barman-cloud` 0.8.1 | WAL archiving and backups for that Cluster |
 | `cloudflared` | bjw-s `app-template` 5.2.1 | Cloudflare Tunnel connector; the only way into the cluster |
+| `reloader` | `reloader` 2.2.18 | rolls the lan-party Deployments when ESO refreshes their Secrets; env vars never change in a running pod |
 
 Sync waves order them: cert-manager and external-secrets first, then the
 CloudNativePG operator, then the plugin that registers against it. The
