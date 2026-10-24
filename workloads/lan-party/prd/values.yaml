@@ -17,6 +17,11 @@ backend:
     tag: "0.9.0"
   storage:
     size: 10Gi
+  config:
+    # Prd reuses dev's Auth0 tenant setup, API identifier included.
+    Mercurius.LAN.API_Auth0__Audience: https://devapi.mercurius-aalst.be
 frontend:
   image:
     tag: "0.8.3"
+  config:
+    Auth0__Audience: https://devapi.mercurius-aalst.be
