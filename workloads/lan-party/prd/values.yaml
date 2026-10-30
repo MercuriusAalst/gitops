@@ -22,6 +22,6 @@ backend:
     Mercurius.LAN.API_Auth0__Audience: https://api.mercurius-aalst.be
 frontend:
   image:
-    tag: "0.8.3"
+    tag: "0.8.4"
   config:
     Auth0__Audience: https://api.mercurius-aalst.be
